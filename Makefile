@@ -12,7 +12,10 @@ CFLAGS=$(COPT) $(CWARN) $(CDBG) $(CDEFS) $(CINC) $(XCF)
 OO=orbit.o orbio.o
 OBJS=test_rdwr.o ssim.o $(OO)
 
-all: ssim
+all: ssim disas
+
+disas: disas.o $(OO)
+	$(CC) $(CFLAGS) $(LFLAGS) $(OO) disas.o -o disas -lm
 
 test_rdwr: test_rdwr.o $(OO)
 	$(CC) $(CFLAGS) $(LFLAGS) $(OO) test_rdwr.o -o test_rdwr

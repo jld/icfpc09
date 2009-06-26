@@ -11,4 +11,4 @@ typedef uint32_t iss_t[SSIZE];
 int orb_step(is_t, ds_t, ds_t, ds_t, int, int);
 
 /* progfile input nstep => */
-void orb_simplesim(const char *, ds_t, int);
+void orb_simplesim(const char *, ds_t, ds_t, int);

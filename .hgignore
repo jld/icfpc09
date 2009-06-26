@@ -5,3 +5,4 @@
 \.o$
 ^test_rdwr$
 ^ssim$
+^disas$

@@ -50,3 +50,31 @@ void orb_write_prog(FILE *fp, is_t insns, ds_t data, int ilim)
 		perror("orb_write_prog");
 }
 
+
+void orb_print_insn(int addr, double d, uint32_t insn)
+{
+	int d_op, d_r1, d_r2, s_op, s_imm, s_r1;
+
+	d_op = insn >> 28;
+	d_r1 = (insn >> 14) & 16383;
+	d_r2 = insn & 16383;
+	s_op = (insn >> 24) & 15;
+	s_imm = (insn >> 21) & 7;
+	s_r1 = insn & 16383;
+
+	if (d_op != 0) {
+		static const char * const ops[] =
+		    { "Add", "Sub", "Mult", "Div", "Output", "Phi" };
+		printf("%04x: [%.11g] %s %04x %04x\n",
+		    addr, d, ops[d_op - 1], d_r1, d_r2);
+	} else {
+		static const char * const ops[] = 
+		    { "Noop", 0, "Sqrt", "Copy", "Input" };
+		static const char * const relops[] =
+		    { "LTZ", "LEZ", "EQZ", "GEZ", "GTZ" };
+		const char* op =
+		    (s_op == 1) ? relops[s_imm] : ops[s_op];
+		printf("%04x: [%.11g] %s %04x\n",
+		    addr, d, op, s_r1);
+	}
+}

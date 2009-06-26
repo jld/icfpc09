@@ -24,9 +24,9 @@ int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 			case 0: /* Noop */
 				break;
 			case 1: /* Cmpz */
-				imm = (insn >> 20) & 15;
+				imm = (insn >> 21) & 7;
 				switch (imm) {
-#define CMPZ(op,rel) case op: stat = data[r1] rel 0.0; break;
+#define CMPZ(cop,rel) case cop: stat = (data[r1] rel 0.0); break;
 					CMPZ(0, <);
 					CMPZ(1, <=);
 					CMPZ(2, ==);
@@ -39,7 +39,7 @@ int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 				}
 				break;
 			case 2: /* Sqrt */
-				data[i] = sqrt(fabs(data[r1]));
+				data[i] = sqrt(data[r1]);
 				break;
 			case 3: /* Copy */
 				data[i] = data[r1];
@@ -71,7 +71,7 @@ int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 			output[r1] = data[r2];
 			break;
 		case 6: /* Phi */
-			data[i] = data[!stat ? r1 : r2];
+			data[i] = data[stat ? r1 : r2];
 			break;
 		default:
 			fprintf(stderr, "Bad D-Type OP at %d: %d\n", i, op);
@@ -81,8 +81,7 @@ int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 }
 
 
-
-void orb_simplesim(const char *prog, ds_t input, int nstep)
+void orb_simplesim(const char *prog, ds_t input0, ds_t inputn, int nstep)
 {
 	FILE *pf;
 	iss_t insns;
@@ -104,14 +103,14 @@ void orb_simplesim(const char *prog, ds_t input, int nstep)
 	stat = 0;
 	for (t = 0; t < nstep; ++t) {
 //		memcpy(olddat, data, sizeof(olddat));
-		stat = orb_step(insns, data, input, output, stat, ilim);
+		stat = orb_step(insns, data, input0, output, stat, ilim);
 		for (i = 0; i < SSIZE; ++i) { /* XXX inefficient but general */
 			if (output[i] != oldout[i])
 				printf("%7ds port[0x%04x] = %.11g\n",
 				    t, i, output[i]);
 //			if (data[i] != olddat[i])
 //				printf("%7ds data[0x%04x] = %.11g\n",
-//				    t, i, output[i]);
+//				    t, i, data[i]);
 			oldout[i] = output[i];
 		}
 	}
