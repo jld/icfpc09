@@ -36,7 +36,7 @@ int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 				}
 				break;
 			case 2: /* Sqrt */
-				data[i] = sqrt(data[r1]);
+				data[i] = sqrt(fabs(data[r1]));
 				break;
 			case 3: /* Copy */
 				data[i] = data[r1];
@@ -77,3 +77,12 @@ int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 	return stat;
 }
 
+
+/*
+void orb_simplesim(const char *prog, const char *trace)
+{
+	FILE *pf, *tf;
+
+	
+}
+*/

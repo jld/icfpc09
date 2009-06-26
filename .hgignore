@@ -3,3 +3,4 @@
 ^\.\#
 ^specs
 \.o$
+^test_rdwr$

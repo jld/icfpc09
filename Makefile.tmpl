@@ -8,12 +8,13 @@ CINC=
 CDBG=
 CFLAGS=$(COPT) $(CWARN) $(CDBG) $(CDEFS) $(CINC) $(XCF)
 
-OBJS=orbit.o orbio.o
+OO=orbit.o orbio.o
+OBJS=test_rdwr.o $(OO)
 
 all: $(OBJS)
 
-#foo: $(OBJS)
-#	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) -o foo
+test_rdwr: test_rdwr.o $(OO)
+	$(CC) $(CFLAGS) $(LFLAGS) $(OO) test_rdwr.o -o test_rdwr
 
 clean:
 	-rm -f $(OBJS)
