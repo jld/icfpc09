@@ -10,4 +10,5 @@ typedef uint32_t iss_t[SSIZE];
 /* insns data input output status n_insn => status */
 int orb_step(is_t, ds_t, ds_t, ds_t, int, int);
 
-//void orb_simplesim(const char *, const char *)
+/* progfile input nstep => */
+void orb_simplesim(const char *, ds_t, int);

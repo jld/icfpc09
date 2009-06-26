@@ -4,3 +4,4 @@
 ^specs
 \.o$
 ^test_rdwr$
+^ssim$

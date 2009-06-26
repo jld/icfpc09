@@ -1,6 +1,8 @@
-#include <stdio.h>
 #include <math.h>
-#include "orbit.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "orbio.h"
 
 int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 {
@@ -10,18 +12,19 @@ int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 		uint32_t insn = insns[i];
 		int imm, r1, r2, op;
 
+		// fprintf(stderr, "insns[%d] = 0x%08x\n", i, insn);
 		op = insn >> 28;
-		r1 = (insn >> 14) & 4095;
-		r2 = insn & 4095;
+		r1 = (insn >> 14) & 16383;
+		r2 = insn & 16383;
 		switch (op) {
 		case 0:
 			op = (insn >> 24) & 15;
-			r1 = insn & 4095;
+			r1 = insn & 16383;
 			switch (op) {
 			case 0: /* Noop */
 				break;
 			case 1: /* Cmpz */
-				imm = (insn >> 14) & 1023;
+				imm = (insn >> 20) & 15;
 				switch (imm) {
 #define CMPZ(op,rel) case op: stat = data[r1] rel 0.0; break;
 					CMPZ(0, <);
@@ -31,7 +34,7 @@ int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 					CMPZ(4, >);
 #undef CMPZ
 				default:
-					fprintf(stderr, "Bad IMM at %d: %d",
+					fprintf(stderr, "Bad IMM at %d: %d\n",
 					    i, imm);
 				}
 				break;
@@ -45,7 +48,7 @@ int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 				data[i] = input[r1];
 				break;
 			default:
-				fprintf(stderr, "Bad S-Type OP at %d: %d",
+				fprintf(stderr, "Bad S-Type OP at %d: %d\n",
 				    i, op);
 			}
 			break;
@@ -68,21 +71,48 @@ int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 			output[r1] = data[r2];
 			break;
 		case 6: /* Phi */
-			data[i] = data[stat ? r1 : r2];
+			data[i] = data[!stat ? r1 : r2];
 			break;
 		default:
-			fprintf(stderr, "Bad D-Type OP at %d: %d", i, op);
+			fprintf(stderr, "Bad D-Type OP at %d: %d\n", i, op);
 		}
 	}
 	return stat;
 }
 
 
-/*
-void orb_simplesim(const char *prog, const char *trace)
-{
-	FILE *pf, *tf;
 
+void orb_simplesim(const char *prog, ds_t input, int nstep)
+{
+	FILE *pf;
+	iss_t insns;
+	dss_t data, output, oldout;
+//	dss_t olddat;
+	int t, i, ilim, stat;
+
+	memset(output, 0, sizeof(output));
+	memset(oldout, 0, sizeof(oldout));
+
+	pf = fopen(prog, "r");
+	if (!pf) {
+		perror(prog);
+		exit(1);
+	}
+	ilim = orb_read_prog(pf, insns, data);
+	fclose(pf);
 	
+	stat = 0;
+	for (t = 0; t < nstep; ++t) {
+//		memcpy(olddat, data, sizeof(olddat));
+		stat = orb_step(insns, data, input, output, stat, ilim);
+		for (i = 0; i < SSIZE; ++i) { /* XXX inefficient but general */
+			if (output[i] != oldout[i])
+				printf("%7ds port[0x%04x] = %.11g\n",
+				    t, i, output[i]);
+//			if (data[i] != olddat[i])
+//				printf("%7ds data[0x%04x] = %.11g\n",
+//				    t, i, output[i]);
+			oldout[i] = output[i];
+		}
+	}
 }
-*/

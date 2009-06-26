@@ -10,12 +10,15 @@ CDBG=
 CFLAGS=$(COPT) $(CWARN) $(CDBG) $(CDEFS) $(CINC) $(XCF)
 
 OO=orbit.o orbio.o
-OBJS=test_rdwr.o $(OO)
+OBJS=test_rdwr.o ssim.o $(OO)
 
-all: $(OBJS)
+all: ssim
 
 test_rdwr: test_rdwr.o $(OO)
 	$(CC) $(CFLAGS) $(LFLAGS) $(OO) test_rdwr.o -o test_rdwr
+
+ssim: ssim.o $(OO)
+	$(CC) $(CFLAGS) $(LFLAGS) $(OO) ssim.o -o ssim -lm
 
 clean:
 	-rm -f $(OBJS)
@@ -29,5 +32,6 @@ _depend:
 	@gcc -MM $(CDEFS) $(CINC) $(CS) >> Makefile
 ###END###
 test_rdwr.o: test_rdwr.c orbio.h orbit.h
-orbit.o: orbit.c orbit.h
+ssim.o: ssim.c orbit.h
+orbit.o: orbit.c orbio.h orbit.h
 orbio.o: orbio.c orbio.h orbit.h
