@@ -18,7 +18,7 @@ disas: disas.o $(OO)
 	$(CC) $(CFLAGS) $(LFLAGS) $(OO) disas.o -o disas -lm
 
 test_rdwr: test_rdwr.o $(OO)
-	$(CC) $(CFLAGS) $(LFLAGS) $(OO) test_rdwr.o -o test_rdwr
+	$(CC) $(CFLAGS) $(LFLAGS) $(OO) test_rdwr.o -o test_rdwr -lm
 
 ssim: ssim.o $(OO)
 	$(CC) $(CFLAGS) $(LFLAGS) $(OO) ssim.o -o ssim -lm

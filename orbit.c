@@ -4,7 +4,8 @@
 #include <string.h>
 #include "orbio.h"
 
-int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
+int
+orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 {
 	int i;
 
@@ -81,7 +82,22 @@ int orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 }
 
 
-void orb_simplesim(const char *prog, ds_t input0, ds_t inputn, int nstep)
+void
+orb_free_trace(itrace_t it)
+{
+	struct trframe *i, *in;
+
+	for (i = it->frames; i; i = in) {
+		in = i->cdr;
+		free(i->maps);
+		free(i);
+	}
+	free(it);
+}
+
+
+void
+orb_simplesim(const char *prog, ds_t input0, ds_t inputn, int nstep)
 {
 	FILE *pf;
 	iss_t insns;
