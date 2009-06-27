@@ -3,6 +3,10 @@
 ^\.\#
 ^specs
 \.o$
+\.cm[oaix]$
+\.cmxa$
+\.a$
+\.so$
 ^test_rdwr$
 ^sim$
 ^disas$
@@ -12,4 +16,4 @@
 ^scratch\.
 \.osf$
 \.orig$
-^\.depend$
+^\.depend

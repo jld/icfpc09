@@ -1,12 +1,14 @@
+OCAMLC=ocamlc
+OCAMLOPT=ocamlopt
 CDEFS=
-COPT=-std=gnu99 -O3 -g -fstrict-aliasing
+COPT=-std=gnu99 -O3 -g -fstrict-aliasing -fPIC
 CWARN=-Wall -W -Wstrict-prototypes -Wmissing-prototypes
 CINC=
 
 CDBG=
 CFLAGS=$(COPT) $(CWARN) $(CDBG) $(CDEFS) $(CINC) $(XCF)
 
-PRODUCTS=sim disas icomp ideco
+PRODUCTS=sim disas icomp ideco orbit.cma
 OO=orbit.o orbio.o
 
 all: $(PRODUCTS)
@@ -26,12 +28,28 @@ test_rdwr: test_rdwr.o $(OO)
 sim: sim.o orbrun.o $(OO)
 	$(CC) $(CFLAGS) $(LFLAGS) $+ -o $@ -lm
 
-DERIVED=*.o
+orbit.cma: orbit_caml.o orbit.cmo $(OO)
+	ocamlmklib -o orbit $+
+
+%.cmi: %.mli
+	$(OCAMLC) -c $<
+
+%.cmx %.cmi: %.ml
+	$(OCAMLOPT) -c $<
+
+%.cmo %.cmi: %.ml
+	$(OCAMLC) -c $<
+
+DERIVED=*.o *.cm[oixa] *.cmxa *.a *.so
 XPRODUCTS=test_rdwr
 
 clean:
 	-rm -f $(DERIVED) $(PRODUCTS) $(XPRODUCTS)
 
-.depend: $(wildcard *.c *.h)
-	gcc -MM $(CDEFS) $(CINC) $(wildcard *.c) > .depend
--include .depend
+.depend_c: $(wildcard *.c *.h)
+	gcc -MM $(CDEFS) $(CINC) $(wildcard *.c) > $@
+-include .depend_c
+
+.depend_ml: $(wildcard *.ml *.mli)
+	ocamldep $+ > $@
+-include .depend_ml
