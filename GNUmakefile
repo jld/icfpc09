@@ -28,7 +28,7 @@ test_rdwr: test_rdwr.o $(OO)
 sim: sim.o orbrun.o $(OO)
 	$(CC) $(CFLAGS) $(LFLAGS) $+ -o $@ -lm
 
-orbit.cma: orbit_caml.o orbit.cmo $(OO)
+orbit.cma: orbit_caml.o orbit.cmo orbutil.cmo $(OO)
 	ocamlmklib -o orbit $+
 
 %.cmi: %.mli
