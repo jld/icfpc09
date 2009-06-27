@@ -6,3 +6,6 @@
 ^test_rdwr$
 ^ssim$
 ^disas$
+^icomp$
+^ideco$
+^test\.

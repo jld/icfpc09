@@ -181,13 +181,13 @@ itrace_t orb_read_trace_text(FILE *fp)
 	uint32_t i;
 	
 	it = malloc(sizeof(struct itrace));
-	xxx(2, fscanf(fp, "h %"SCNu32" %"SCNu32,
+	xxx(2, fscanf(fp, " h %"SCNu32" %"SCNu32,
 		&it->team, &it->scenario));
 	it->frames = NULL;
 
 	for (;;) {
 		tf = malloc(sizeof(struct trframe));
-		xxx(2, fscanf(fp, "f %"SCNu32" %"SCNu32,
+		xxx(2, fscanf(fp, " f %"SCNu32" %"SCNu32,
 			&tf->time, &tf->count));
 		tf->maps = NULL;
 		tf->cdr = it->frames;
@@ -200,7 +200,7 @@ itrace_t orb_read_trace_text(FILE *fp)
 		}
 		tf->maps = malloc(tf->count * sizeof(struct valmap));
 		for (i = 0; i < tf->count; ++i) {
-			xxx(2, fscanf(fp, "%"SCNu32" %lg", 
+			xxx(2, fscanf(fp, " %"SCNu32" %lg", 
 				&tf->maps[i].addr, &tf->maps[i].value));
 		}
 	}
