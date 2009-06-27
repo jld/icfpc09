@@ -23,12 +23,16 @@ struct valmap {
 	double value;
 };
 
-
-/* insns data input output status n_insn => status */
-int orb_step(is_t, ds_t, ds_t, ds_t, int, int);
-
-/* progfile input nstep => */
-void orb_simplesim(const char *, ds_t, ds_t, int);
+typedef void(*orbout_t)(void*, int, double);
 
 
 void orb_free_trace(itrace_t);
+
+/* insns n_insn data input status output/rc => status */
+int orb_step(is_t, int, ds_t, ds_t, int, orbout_t, void*);
+
+/* progfile tracefile humanp => | stdout */
+void orb_run(FILE *, FILE *, int);
+
+/* trf_iter time input => */
+struct trframe *orb_apply_trace(struct trframe *, uint32_t, ds_t);

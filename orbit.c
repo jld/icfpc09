@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,7 +6,8 @@
 #include "orbio.h"
 
 int
-orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
+orb_step(is_t insns, int ilim, ds_t data, ds_t input, int stat,
+    orbout_t out, void *orc)
 {
 	int i;
 
@@ -69,7 +71,7 @@ orb_step(is_t insns, ds_t data, ds_t input, ds_t output, int stat, int ilim)
 				data[i] = data[r1] / data[r2];
 			break;
 		case 5: /* Output */
-			output[r1] = data[r2];
+			out(orc, r1, data[r2]);
 			break;
 		case 6: /* Phi */
 			data[i] = data[stat ? r1 : r2];
@@ -95,9 +97,70 @@ orb_free_trace(itrace_t it)
 	free(it);
 }
 
+static void orb_run_out(void *, int, double);
+
+struct orb_run_env
+{
+	dss_t output;
+	int time, humanp;
+};
 
 void
-orb_simplesim(const char *prog, ds_t input0, ds_t inputn, int nstep)
+orb_run(FILE *pfi, FILE *tfi, int humanp)
+{
+	iss_t insns;
+	dss_t data, input;
+	struct orb_run_env oe;
+	itrace_t it;
+	struct trframe *tf;
+	int ilim, stat, t;
+
+	memset(oe.output, 0, sizeof(oe.output));
+	oe.humanp = humanp;
+	
+	ilim = orb_read_prog(pfi, insns, data);
+	it = orb_read_trace(tfi);
+	tf = it->frames;
+
+	stat = 0;
+	for (t = 0; tf; ++t) {
+		tf = orb_apply_trace(tf, t, input);
+		oe.time = t;
+		stat = orb_step(insns, ilim, data, input, stat,
+		    orb_run_out, &oe);
+	}
+	orb_free_trace(it);
+}
+
+static void
+orb_run_out(void *ve, int addr, double val)
+{
+	struct orb_run_env *pe = ve;
+
+	if (val != pe->output[addr]) {
+		printf(pe->humanp ? "%7ds port[0x%04x] = %.17g\n"
+		    : "%d %d %.17g\n", pe->time, addr, val);
+		pe->output[addr] = val;
+	}
+}
+
+struct trframe *
+orb_apply_trace(struct trframe *tf, uint32_t t, ds_t input)
+{
+	uint32_t i;
+
+	assert(t <= tf->time);
+	if (t == tf->time) {
+		for (i = 0; i < tf->count; ++i)
+			input[tf->maps[i].addr] = tf->maps[i].value;
+		tf = tf->cdr;
+	}
+	return tf;
+}
+
+#if 0
+void
+orb_simplesim(const char *prog, ds_t input, int nstep)
 {
 	FILE *pf;
 	iss_t insns;
@@ -131,3 +194,4 @@ orb_simplesim(const char *prog, ds_t input0, ds_t inputn, int nstep)
 		}
 	}
 }
+#endif

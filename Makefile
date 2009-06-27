@@ -10,9 +10,10 @@ CDBG=
 CFLAGS=$(COPT) $(CWARN) $(CDBG) $(CDEFS) $(CINC) $(XCF)
 
 OO=orbit.o orbio.o
-OBJS=test_rdwr.o ssim.o $(OO)
+PO=test_rdwr.o sim.o disas.o ideco.o icomp.o
+OBJS=$(PO) $(OO)
 
-all: ssim disas icomp ideco
+all: sim disas icomp ideco
 
 icomp: icomp.o $(OO)
 	$(CC) $(CFLAGS) $(LFLAGS) $(OO) icomp.o -o icomp -lm
@@ -26,11 +27,11 @@ disas: disas.o $(OO)
 test_rdwr: test_rdwr.o $(OO)
 	$(CC) $(CFLAGS) $(LFLAGS) $(OO) test_rdwr.o -o test_rdwr -lm
 
-ssim: ssim.o $(OO)
-	$(CC) $(CFLAGS) $(LFLAGS) $(OO) ssim.o -o ssim -lm
+sim: sim.o $(OO)
+	$(CC) $(CFLAGS) $(LFLAGS) $(OO) sim.o -o sim -lm
 
 clean:
-	-rm -f $(OBJS) ssim test_rdwr disas icomp ideco
+	-rm -f $(OBJS) $(PO:.o=)
 
 CS=$(OBJS:.o=.c)
 Makefile: Makefile.tmpl $(CS)
@@ -41,6 +42,9 @@ _depend:
 	@gcc -MM $(CDEFS) $(CINC) $(CS) >> Makefile
 ###END###
 test_rdwr.o: test_rdwr.c orbio.h orbit.h
-ssim.o: ssim.c orbit.h
+sim.o: sim.c orbio.h orbit.h
+disas.o: disas.c orbio.h orbit.h
+ideco.o: ideco.c orbio.h orbit.h
+icomp.o: icomp.c orbio.h orbit.h
 orbit.o: orbit.c orbio.h orbit.h
 orbio.o: orbio.c orbio.h orbit.h
