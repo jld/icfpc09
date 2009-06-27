@@ -9,3 +9,5 @@
 ^icomp$
 ^ideco$
 ^test\.
+^scratch\.
+\.osf$
