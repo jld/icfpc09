@@ -9,7 +9,7 @@ CINC=
 CDBG=
 CFLAGS=$(COPT) $(CWARN) $(CDBG) $(CDEFS) $(CINC) $(XCF)
 
-OO=orbit.o orbio.o
+OO=orbit.o orbio.o orbrun.o
 PO=test_rdwr.o sim.o disas.o ideco.o icomp.o
 OBJS=$(PO) $(OO)
 
@@ -42,9 +42,10 @@ _depend:
 	@gcc -MM $(CDEFS) $(CINC) $(CS) >> Makefile
 ###END###
 test_rdwr.o: test_rdwr.c orbio.h orbit.h
-sim.o: sim.c orbio.h orbit.h
+sim.o: sim.c orbrun.h orbit.h
 disas.o: disas.c orbio.h orbit.h
 ideco.o: ideco.c orbio.h orbit.h
 icomp.o: icomp.c orbio.h orbit.h
 orbit.o: orbit.c orbio.h orbit.h
 orbio.o: orbio.c orbio.h orbit.h
+orbrun.o: orbrun.c orbio.h orbit.h

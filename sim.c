@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <getopt.h>
-#include "orbio.h"
+#include "orbrun.h"
 
 int main(int argc, char **argv)
 {
