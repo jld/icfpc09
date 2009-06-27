@@ -1,8 +1,7 @@
 #!/usr/bin/env zsh
 set -e
 
-make -f Makefile.tmpl Makefile
-make sim icomp
+make sim icomp || true
 team=39
 scen=$1
 
