@@ -9,7 +9,7 @@ CINC=
 CDBG=
 CFLAGS=$(COPT) $(CWARN) $(CDBG) $(CDEFS) $(CINC) $(XCF)
 
-OO=orbit.o orbio.o orbrun.o
+OO=orbit.o orbio.o
 PO=test_rdwr.o sim.o disas.o ideco.o icomp.o
 OBJS=$(PO) $(OO)
 
@@ -27,11 +27,11 @@ disas: disas.o $(OO)
 test_rdwr: test_rdwr.o $(OO)
 	$(CC) $(CFLAGS) $(LFLAGS) $(OO) test_rdwr.o -o test_rdwr -lm
 
-sim: sim.o $(OO)
-	$(CC) $(CFLAGS) $(LFLAGS) $(OO) sim.o -o sim -lm
+sim: sim.o orbrun.o $(OO)
+	$(CC) $(CFLAGS) $(LFLAGS) $(OO) sim.o orbrun.o -o sim -lm
 
 clean:
-	-rm -f $(OBJS) $(PO:.o=)
+	-rm -f $(OBJS) $(PO:.o=) orbrun.o
 
 CS=$(OBJS:.o=.c)
 Makefile: Makefile.tmpl $(CS)
@@ -48,4 +48,3 @@ ideco.o: ideco.c orbio.h orbit.h
 icomp.o: icomp.c orbio.h orbit.h
 orbit.o: orbit.c orbio.h orbit.h
 orbio.o: orbio.c orbio.h orbit.h
-orbrun.o: orbrun.c orbio.h orbit.h
