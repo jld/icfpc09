@@ -33,7 +33,7 @@ let orb_step_array insns data input rstat =
   arr
 
 let in_scene scene =
-  let arr = dss() in
+  let arr = dss () in
   A.fill arr 0.0;
   A.set arr 0x3E80 (float_of_int scene);
   arr

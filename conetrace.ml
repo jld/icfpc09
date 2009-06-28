@@ -6,7 +6,7 @@ let ilh xl xh =
   if xl <= xh then (xl, xh) else (xh, xl)    
 
 let ipm x pm = 
-  if pm > 0
+  if pm > 0.0
   then ((x -. pm), (x +. pm))
   else ((x +. pm), (x -. pm))
 
@@ -49,8 +49,8 @@ let ( ==:> ) (l, h) x = l <= x && x <= h
 let ( ==:< ) x a = a ==:> x
 
 let ( ~/. ) x = 1. /. x
-let ( ~/: ) ((l, h) as i) = 
-  if a ==:> 0 then failwith "Divide by zero"
+let ( ~/: ) ((l, h) as a) = 
+  if a ==:> 0.0 then failwith "Divide by zero"
   else ((~/. h), (~/. l))
 
 let ( /: ) a b = a *: (~/: b)
@@ -70,12 +70,14 @@ let ( ~-% ) (ax, ay) = ((~-: ax), (~-: ay))
 let ( *%+ ) (ax, ay) (bx, by) = (ax *: bx) +: (ay *: by)
 let ( *%- ) (ax, ay) (bx, by) = (ax *: by) -: (ay *: bx)
 let ( *%> ) (ax, ay) b = ((ax *: b), (ay *: b))
+let ( *%< ) a b = b *%> a
 let ( *%>> ) (ax, ay) b = ((ax *:> b), (ay *:> b))
+let ( *%<< ) a b = b *%>> a
 let ( /%> ) a b = a *%> (~/: b)
 let ( /%>> ) a b = a *%>> (~/. b)
 
 let ( ~*% ) (ax, ay) = (~*: ax) +: (~*: ay)
-let ( ~*%! ) a = sqrt (~*% a)
+let ( ~*%! ) a = isqrt (~*% a)
 
 (*****)
 
@@ -85,8 +87,8 @@ let mmu = 4903.593516e9
 let grav mu s =
   let r2 = ~*% s in
   let ga = mu /:< r2
-  and r = sqrt r2 in
-  ~-% ga *%< (s /%> r)
+  and r = isqrt r2 in
+  ~-: ga *%< (s /%> r)
 
 let tstep (s0, v0) =
   let ga0 = grav emu s0 in
