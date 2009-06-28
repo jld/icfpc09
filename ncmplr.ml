@@ -67,7 +67,7 @@ let states insns =
     | Copy r -> used.(r) <- true
     | Input _ -> used.(i) <- true
     | Binop (_,r1,r2) -> used.(r1) <- true; used.(r2) <- true
-    | Output (_,_) -> used.(i) <- true
+    | Output (_,r) -> used.(i) <- true; used.(r) <- true
     | Phi (r1,r2) -> used.(r1) <- true; used.(r2) <- true
     end;
     if used.(i) then states.(i) <- true
@@ -107,13 +107,17 @@ let to_c imap omap insns data =
       | Copy r -> vref r
       | Input p -> imap p
       | Binop (op,r1,r2) -> 
-	  Printf.sprintf "(%s %s %s)" (vref r1)
+	  Printf.sprintf "%s %s %s" (vref r1)
 	    (match op with Add -> "+" | Sub -> "-" | Mult -> "*" | Div -> "/")
 	    (vref r2)
       | Output (p,r) ->
-	  Printf.sprintf "((%s = %s), %s)" (omap p) (vref r) (vref i)
+	  begin match (omap p) with
+	    Some olv ->
+	      Printf.sprintf "(%s = %s), %s" (olv) (vref r) (vref i)
+	  | None -> (vref i)
+	  end
       | Phi (r1,r2) -> 
-	  Printf.sprintf "(%s ? %s : %s)" !lastcmp (vref r1) (vref r2)
+	  Printf.sprintf "%s ? %s : %s" !lastcmp (vref r1) (vref r2)
       end
   done;
   for i = 0 to pred ilim do
@@ -123,4 +127,6 @@ let to_c imap omap insns data =
   Buffer.add_string bac "}\n";
   (Buffer.contents bst, Buffer.contents bac)
 
-let stoc = to_c (fun p -> "in"^(string_of_int p)) (fun p -> "out"^(string_of_int p))
+let stoc = to_c
+    (fun p -> "in"^(string_of_int p))
+    (fun p -> Some ("out"^(string_of_int p)))
