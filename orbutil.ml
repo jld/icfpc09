@@ -44,3 +44,27 @@ let initcond (a0,a1) base =
   let (sx0, sy0) = if base < 0 then here a0 else there a0 base
   and (sx1, sy1) = if base < 0 then here a1 else there a1 base in
   ((sx0, sy0), vextr sx0 sy0 sx1 sy1)
+
+let sram ((sx,sy),(vx,vy)) =
+  sx *. vy -. sy *. vx
+
+let mag (x,y) =
+  sqrt (x *. x +. y *. y)
+
+let norm (x,y) =
+  let r = sqrt (x *. x +. y *. y) in
+  ((x /. r), (y /. r))
+
+let ecc ((s,(vx,vy)) as sv)  =
+  let h = sram sv
+  and (nx,ny) = norm s in
+  ((vy *. h /. mu -. nx),
+   (-. vx *. h /. mu -. ny))
+
+let ainv (s,(vx,vy)) = 
+  (2. /. mag s) -. ((vx *. vx +. vy *. vy) /. mu)
+
+let pi = atan2 0. (-1.)
+
+let period x = sqrt (4. *. pi *. pi *. (ainv x) ** -3. /. mu);;
+
