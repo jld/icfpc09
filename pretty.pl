@@ -28,24 +28,27 @@ sub forvalue {
     return $data[$i] if $noop[$i];
     return $name[$i] if defined $name[$i] and not $top;
     return "in$args[$i][0]" if $insn[$i] eq "Input";
+    return $forvalue[$i] if defined $forvalue[$i];
     my $fun = {
 	Sqrt => sub { "sqrt($_[0])" },
 	Copy => sub { $_[0] },
 	Add => sub { "($_[0] + $_[1])" },
 	Sub => sub { "($_[0] - $_[1])" },
-	Mult => sub { "$_[0] * $_[1]" },
-	Div => sub { "$_[0] / $_[1]" },
+	Mult => sub { "($_[0] * $_[1])" },
+	Div => sub { "($_[0] / $_[1])" },
 	Phi => sub { "($stat ? $_[0] : $_[1])" }
     }->{$insn[$i]};
-    return $fun->(map { forvalue($_) } @{$args[$i]});
+    my $fv = $fun->(map { forvalue($_) } @{$args[$i]});
+    $forvalue[$i] = $fv unless defined $forvalue[$i];
+    return $fv;
 }
 
 sub foreffect {
     my ($i) = @_;
+    my $v = forvalue($i,1);
     return "" if $insn[$i] eq "Noop";
     my $dfl = sub {
 	if (defined $name[$i]) {
-	    my $v = forvalue($i,1);
 	    return "$name[$i] = $v;\n";
 	} else {
 	    return "";
@@ -72,6 +75,10 @@ sub foreffect {
     }->{$insn[$i]};
     $fun = $dfl unless defined $fun;
     return $fun->(@{$args[$i]});
+}
+
+for $i (0..$max) {
+    print "$name[$i] := $data[$i]\n" if $state[$i] and not $noop[$i];
 }
 
 $stat = "XXX";
