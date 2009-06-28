@@ -61,10 +61,23 @@ let isqrt (al, ah) = ((sqrt al), (sqrt ah))
 
 (*****)
 
+module U = Orbutil
+let emu = U.emu
+let mmu = U.mmu
+
+(*****)
+
 type vi = i * i
 
+let viof (x, y) = ((iof x), (iof y))
+let vilh (xl, yl) (xh, yh) = ((ilh xl xh), (ilh yl yh))
+let vipm (xm, ym) (xd, yd) = ((ipm xm xd), (ipm ym yd))
+let visc (xa, ya) (xs, ys) = ((isc xa xs), (isc ya ys))
+
 let ( +% ) (ax, ay) (bx, by) = ((ax +: bx), (ay +: by))
+let ( +%^ ) (ax, ay) (x, y) = ((ax +:> x), (ay +:> y))
 let ( -% ) (ax, ay) (bx, by) = ((ax -: bx), (ay -: by))
+let ( -%^ ) (ax, ay) (x, y) = ((ax -:> x), (ay -:> y))
 let ( ~-% ) (ax, ay) = ((~-: ax), (~-: ay))
 
 let ( *%+ ) (ax, ay) (bx, by) = (ax *: bx) +: (ay *: by)
@@ -75,14 +88,11 @@ let ( *%>> ) (ax, ay) b = ((ax *:> b), (ay *:> b))
 let ( *%<< ) a b = b *%>> a
 let ( /%> ) a b = a *%> (~/: b)
 let ( /%>> ) a b = a *%>> (~/. b)
-
+    
 let ( ~*% ) (ax, ay) = (~*: ax) +: (~*: ay)
 let ( ~*%! ) a = isqrt (~*% a)
 
 (*****)
-
-let emu = 400456.8e9
-let mmu = 4903.593516e9
 
 let grav mu s =
   let r2 = ~*% s in
@@ -90,7 +100,7 @@ let grav mu s =
   and r = isqrt r2 in
   ~-: ga *%< (s /%> r)
 
-let tstep (s0, v0) =
+let tstep s0 v0 =
   let ga0 = grav emu s0 in
   let s1 = s0 +% v0 +% (ga0 /%>> 2.) in
   let ga1 = grav emu s1 in
@@ -98,11 +108,51 @@ let tstep (s0, v0) =
   (s1, v1)
 
 let gravm sm s =
-  (grav emu s) +% (grav mmu (s -% sm))
+  (grav emu s) +% (grav mmu (s -%^ sm))
 
-let tstepm sm0 sm1 (s0, v0) = 
+let tstepm sm0 sm1 s0 v0 = 
   let ga0 = gravm sm0 s0 in
   let s1 = s0 +% v0 +% (ga0 /%>> 2.) in
   let ga1 = gravm sm1 s1 in
   let v1 = v0 +% ((ga0 +% ga1) /%>> 2.) in
   (s1, v1)
+
+(* sat ps/vs, sat enablep; our p/v; moon p/v, moonp *)
+
+type vf = float * float
+
+type conetrace = {
+    sat_s: vf array; sat_v: vf array; satp: bool array;
+    mutable moon_s: vf; mutable moon_v: vf; moonp: bool;
+    mutable our_s: vi; mutable our_v: vi }
+
+let ct0 = {
+  sat_s = [||]; sat_v = [||]; satp = [||];
+  moon_s = 0.,0.; moon_v = 0.,0.; moonp = false;
+  our_s = viof (0.,0.); our_v = viof (0.,0.) }
+
+let ct_copy ct =
+  { ct with
+    sat_s = Array.copy ct.sat_s;
+    sat_v = Array.copy ct.sat_v;
+    satp = Array.copy ct.satp }
+
+let ct_step ct =
+  if ct.moonp then begin
+    let sm0 = ct.moon_s and vm0 = ct.moon_v in
+    let (sm1, vm1) = U.tstep sm0 vm0 in
+    let (s1, v1) = tstepm sm0 sm1 ct.our_s ct.our_v in
+    for i = 0 to pred (Array.length ct.sat_s) do
+      let (ss1, vs1) = U.tstepm sm0 sm1 ct.sat_s.(i) ct.sat_v.(i) in
+      ct.sat_s.(i) <- ss1; ct.sat_v.(i) <- vs1
+    done;
+    ct.moon_s <- sm1; ct.moon_v <- vm1;
+    ct.our_s <- s1; ct.our_v <- v1
+  end else begin
+    let (s1, v1) = tstep ct.our_s ct.our_v in
+    for i = 0 to pred (Array.length ct.sat_s) do
+      let (ss1, vs1) = U.tstep ct.sat_s.(i) ct.sat_v.(i) in
+      ct.sat_s.(i) <- ss1; ct.sat_v.(i) <- vs1
+    done;
+    ct.our_s <- s1; ct.our_v <- v1
+  end
