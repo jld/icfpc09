@@ -59,7 +59,7 @@ orbcaml_step(value cinsns, value cdata, value cinput, value cstat, value outf)
 	stat = Bool_val(Field(cstat, 0));
 	
 	stat = orb_step(insns, ilim, data, input, stat, orbcaml_outfun,
-	    (void*)outf);
+	    (void*)&outf);
 	Store_field(cstat, 0, Val_bool(stat));
 
 	CAMLreturn(Val_unit);
@@ -72,6 +72,6 @@ orbcaml_outfun(void* env, int addr, double val)
 	CAMLlocal1(dval);
 
 	dval = caml_copy_double(val);
-	caml_callback2((value)env, Val_int(addr), dval);
+	caml_callback2(*(value*)env, Val_int(addr), dval);
 	CAMLreturn0;
 }
