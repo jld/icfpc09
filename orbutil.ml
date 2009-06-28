@@ -1,8 +1,11 @@
 open Orbit
 
 let earthbase = 2
-let emu = 400456.8e9
-let mmu = 0.0 (* 4903.593516e9 *)
+(* let emu = 400456.8e9 *)
+(* let mmu = 4903.593516e9 *)
+let gcon = 6.67428e-11
+let emu = 6.0e24 *. gcon
+let mmu = 7.347e22 *. gcon
 let moonrad = 1738000.0
 
 let grav mu x y =
