@@ -113,7 +113,7 @@ let to_c imap omap insns data =
       | Output (p,r) ->
 	  begin match (omap p) with
 	    Some olv ->
-	      Printf.sprintf "(%s = %s), %s" (olv) (vref r) (vref i)
+	      Printf.sprintf "((%s = %s), %s)" (olv) (vref r) (vref i)
 	  | None -> (vref i)
 	  end
       | Phi (r1,r2) -> 
@@ -130,3 +130,11 @@ let to_c imap omap insns data =
 let stoc = to_c
     (fun p -> "in"^(string_of_int p))
     (fun p -> Some ("out"^(string_of_int p)))
+
+let ctofi base (decls,stmt) =
+  let fd = open_out (base^"_decl.i") in
+  output_string fd decls;
+  close_out fd;
+  let fs = open_out (base^"_stmt.i") in
+  output_string fs stmt;
+  close_out fs
