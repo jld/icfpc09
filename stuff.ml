@@ -3,6 +3,7 @@ let _ =
   let c = Ncmplr.to_c ~ivec:[2;3] ~ovec:(fun _ -> true)
       ~imap:(function 2 -> "in2" | 3 -> "in3" | 16000 -> "SCENE")
       ~omap:(function
+	  0 -> Some "score" |
 	  2 -> Some "relx_earth" | 3 -> Some "rely_earth"
 	| p when 7 <= p && p < 40 ->
 	    Some (Printf.sprintf "%s[%d]"
