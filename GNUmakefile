@@ -41,6 +41,10 @@ gridtrace.cma: gridtrace.o gridtrace.cmo
 scattertrace.cma: scattertrace.o scattertrace.cmo
 	ocamlmklib -o scattertrace $+
 
+II=gridtrace_decl.i gridtrace_stmt.i st_preload_decl.i st_preload_stmt.i scattertrace_decl.i scattertrace_stmt.i
+$(II): orbit.cma ncmplr.cma stuff.ml
+	ocaml bigarray.cma $+
+
 %.cmi: %.mli
 	$(OCAMLC) -c $<
 
@@ -50,7 +54,7 @@ scattertrace.cma: scattertrace.o scattertrace.cmo
 %.cmo %.cmi: %.ml
 	$(OCAMLC) -c $<
 
-DERIVED=*.o *.cm[oixa] *.cmxa *.a *.so
+DERIVED=*.o *.cm[oixa] *.cmxa *.a *.so *.i
 XPRODUCTS=test_rdwr
 
 clean:

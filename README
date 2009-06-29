@@ -1,11 +1,19 @@
-Stuff in order of being made:
+Stuff in order of being written:
   orb*.[hc]: an interpretive virtual machine in C
-  other *.c: ...and associated utilities
-  hohmann.zsh: Yes, I did the math in zsh.  Why not.
+  other *.c: ...and associated utilities.
+
+  icomp/ideco: translate input traces from/to a text format; invoke like cat
+  sim: the simulator; "./sim foo.obf bar.osf" or "./sim foo.obf < bar.osf";
+    prints outputs changed at each time step
+  disas: disassembles scenario binaries (requires input on stdin)
+
+  hohmann.zsh: Yes, I did the Wikipedia-cribbed math in zsh.  Why not.
   meetgreet.zsh: Likewise.  (Note the variable "fudge" in this and the above.)
 
   orbit_caml.c, orbit.ml: OCaml bindings for the interpreter &c
   orbutil.ml: attempts at doing physics on my own; never quite worked right
+
+  pretty.pl: takes output of disas and makes it prettier       
 
   disas.ml: Now I can disassemble VM programs in ML...
   ncmplr.ml: ...and compile them to C.
@@ -44,3 +52,25 @@ flight plans with a common prefix.
     less keep compatibility, and record the flags I used (on a new
     OCaml process, which has a deterministic random seed).
 
+Building/Using:
+
+  Assumes that a subdirectory "specs" has been created and the
+  scenario files are within.
+
+  Applying GNU make to the default target should take care of building.
+  Note that the scenario number to use in scattertrace is hard-coded
+  into the C file; it shouldn't be hard to find.
+
+  (Requires GCC, OCaml with dynamic library support, and zsh for the
+  section 1/2 stuff.  Assumes a little-endian machine with IEEE
+  floating point; AMD64 is one such.  (A static-only OCaml can be
+  accomodated without much work, as probably could a generic C99
+  compiler.)  Also perl for the pretty-printer.)
+
+  Near the bottom of scattertrace.ml are my notes on the arguments I
+  gave the function there for the various problems.  Basically, inside
+  "ocaml scattertrace.cma", "let at = Scattertrace.moreauto [the
+  arguments];;", hope it eventually terminates, "print_string
+  (printout [scenario#] at);;", copy that text, then in a shell
+  "./icomp > whatever.osf" and paste the text.  If done first thing in
+  a new OCaml process, that should get the same random seed as I did.
