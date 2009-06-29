@@ -1,5 +1,5 @@
-external scattertrace : int -> (float * float) array -> 
-  (float * int) array
+external scattertrace : ((float * float) * int) list ->
+  int -> (float * float) array -> (float * int) array
     = "caml_scattertrace"
 external vsize : unit -> int 
     = "caml_st_vsize"
@@ -11,9 +11,9 @@ let rpo (cx,cy) mr =
   and th = Random.float (2. *. pi) in
   ((cx +. r *. cos th), (cy +. r *. sin th))
 
-let scbe t n c mr =
+let scbe pl t n c mr =
   let po = Array.init n (fun _ -> rpo c mr) in
-  let ra = scattertrace t po in
+  let ra = scattertrace pl t po in
   let be = ref ((-2., -1),(0.,0.)) in
   for i = 0 to pred n do
     if (fst ra.(i)) > (fst (fst !be)) then
@@ -22,18 +22,20 @@ let scbe t n c mr =
   !be
 
 (* 60000 96 3000. 10. *)
-let semiauto time nthr dvlim step =
+let semiauto ?(valid=true) ?(pl=[]) time nthr dvlim step =
   let rec loop cen dvlim util =
     Printf.printf "scbe %d %d (%g,%g) %g \\ %g\n%!" 
       time nthr (fst cen) (snd cen) dvlim util;
-    let ((util',st),cen') = scbe time nthr cen dvlim in
-    if st < 0 then
+    let ((util',st),cen') = scbe pl time nthr cen dvlim in
+    if st <= 0 then
       if util' > util then
 	loop cen' (dvlim /. step) util'
       else
 	loop cen (dvlim /. step) util
-    else begin
+    else if valid then begin
       Printf.printf "validating (%.18g,%.18g)...\n%!" (fst cen') (snd cen');
-      scbe 2000000 (vsize ()) cen' 0.01
-    end in
+      scbe pl 2000000 (vsize ()) cen' 0.01
+    end else 
+      ((util',st),cen')
+  in
   loop (0.,0.) dvlim 0.

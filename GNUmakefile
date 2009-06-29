@@ -1,12 +1,13 @@
 OCAMLC=ocamlc
 OCAMLOPT=ocamlopt
 CDEFS=
-COPT=-std=gnu99 -O3 -g -fstrict-aliasing -fPIC
+COPT=-O3 -fstrict-aliasing
+CREQ=-std=gnu99 -fPIC
 CWARN=-Wall -W -Wstrict-prototypes -Wmissing-prototypes
 CINC=
 
 CDBG=
-CFLAGS=$(COPT) $(CWARN) $(CDBG) $(CDEFS) $(CINC) $(XCF)
+CFLAGS=$(CREQ) $(COPT) $(CWARN) $(CDBG) $(CDEFS) $(CINC) $(XCF)
 
 PRODUCTS=sim disas icomp ideco orbit.cma ncmplr.cma scattertrace.cma
 OO=orbit.o orbio.o

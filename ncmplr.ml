@@ -78,7 +78,9 @@ let states insns =
 let to_c ?(vsize = "VSIZE") ?(ivec = []) ?(ovec = fun _ -> false)
     ?(imap = (fun p -> "in"^(string_of_int p)))
     ?(omap = (fun p -> Some ("out"^(string_of_int p))))
+    ?(statepfx = "") ?copyfrom
     insns data =
+  let sp = statepfx^"_sv" in
   let (ovec',dvec) = contam insns ivec in
   (* If the outputs that have to be vectorized aren't expected to be...*)
   List.iter (fun p -> if not (ovec p) && (omap p) != None then
@@ -96,15 +98,24 @@ let to_c ?(vsize = "VSIZE") ?(ivec = []) ?(ovec = fun _ -> false)
 *)
   for i = 0 to pred ilim do
     if sta.(i) then begin
-      if dvec.(i) then
-	if data.(i) = 0.0 then
-	  Printf.bprintf bst "double _sv%d[%s] = { 0 };\n" i vsize
-	else begin
-	  Printf.bprintf bst "double _sv%d[%s];\n" i vsize;
-	  forloop bst (Printf.sprintf "_sv%d[_i] = %.18g" i data.(i))
-	end
-      else
-	Printf.bprintf bst "double _sv%d = %.18g;\n" i data.(i)
+      match copyfrom with
+	None ->
+	  if dvec.(i) then
+	    if data.(i) = 0.0 then
+	      Printf.bprintf bst "double %s%d[%s] = { 0 };\n" sp i vsize
+	    else begin
+	      Printf.bprintf bst "double %s%d[%s];\n" sp i vsize;
+	      forloop bst (Printf.sprintf "%s%d[_i] = %.18g" sp i data.(i))
+	    end
+	  else
+	    Printf.bprintf bst "double %s%d = %.18g;\n" sp i data.(i)
+      | Some opfx ->
+	  let op = opfx^"_sv" in
+	  if dvec.(i) then begin
+	    Printf.bprintf bst "double %s%d[%s];\n" sp i vsize;
+	    forloop bst (Printf.sprintf "%s%d[_i] = %s%d" sp i op i)
+	  end else
+	    Printf.bprintf bst "double %s%d = %s%d;\n" sp i op i
     end
   done;
 
@@ -117,7 +128,7 @@ let to_c ?(vsize = "VSIZE") ?(ivec = []) ?(ovec = fun _ -> false)
       if b then (vecp := true; v^"[_i]") else v in
     let vref n =
       deco dvec.(n)
-	((if sta.(n) && n >= i then "_sv" else "_v")^(string_of_int n))
+	((if sta.(n) && n >= i then sp else "_v")^(string_of_int n))
     and iref p =
       deco (List.memq p ivec) (imap p)
     and oref p =
@@ -163,9 +174,9 @@ let to_c ?(vsize = "VSIZE") ?(ivec = []) ?(ovec = fun _ -> false)
   for i = 0 to pred ilim do
     if sta.(i) then 
       if dvec.(i) then
-	forloop bac (Printf.sprintf "_sv%d[_i] = _v%d[_i]" i i)
+	forloop bac (Printf.sprintf "%s%d[_i] = _v%d[_i]" sp i i)
       else
-	Printf.bprintf bac "\t_sv%d = _v%d;\n" i i
+	Printf.bprintf bac "\t%s%d = _v%d;\n" sp i i
   done;
   Buffer.add_string bac "}\n";
   (Buffer.contents bst, Buffer.contents bac)
