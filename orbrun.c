@@ -43,8 +43,8 @@ orb_run_out(void *ve, int addr, double val)
 	struct orb_run_env *pe = ve;
 
 	if (val != pe->output[addr]) {
-		printf(pe->humanp ? "%7ds port[0x%04x] = %.17g\n"
-		    : "%d %d %.17g\n", pe->time, addr, val);
+		printf(pe->humanp ? "%7ds port[0x%04x] = %.18g\n"
+		    : "%d %d %.18g\n", pe->time, addr, val);
 		pe->output[addr] = val;
 	}
 }

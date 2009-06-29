@@ -74,28 +74,23 @@ let states insns =
   done;
   states
 
-(* double svN for N in state;
-   ...
-   double vN = exprN for all N;
-   double svN = vN for N in state;   
-*)
 
-let to_c ?(vsize = "VSIZE") ?(ivec = []) ?(ovec = [])
+let to_c ?(vsize = "VSIZE") ?(ivec = []) ?(ovec = fun _ -> false)
     ?(imap = (fun p -> "in"^(string_of_int p)))
     ?(omap = (fun p -> Some ("out"^(string_of_int p))))
     insns data =
   let (ovec',dvec) = contam insns ivec in
   (* If the outputs that have to be vectorized aren't expected to be...*)
-  List.iter (fun p -> if not (List.memq p ovec) && (omap p) != None then
+  List.iter (fun p -> if not (ovec p) && (omap p) != None then
     failwith (Printf.sprintf
 		"ncmplr: output %d must be vectorized or ignored" p)) ovec';
-  let ilim = Array.length insns 
+  let ilim = Array.length insns
   and bst = Buffer.create 1024
   and sta = states insns
   and forloop b s = Printf.bprintf b "for(_i = 0; _i < %s; ++_i) {\n\t%s;\n}\n"
       vsize s in
 
-  if ivec != [] && ovec != [] then
+  if ivec != [] then
     Buffer.add_string bst "int _i;\n";
   for i = 0 to pred ilim do
     if sta.(i) then begin
@@ -125,7 +120,7 @@ let to_c ?(vsize = "VSIZE") ?(ivec = []) ?(ovec = [])
       deco (List.memq p ivec) (imap p)
     and oref p =
       match (omap p) with
-	Some olv -> Some (deco (List.memq p ovec) olv)
+	Some olv -> Some (deco (ovec p) olv)
       | None -> None
     in
 
@@ -177,9 +172,7 @@ let to_c ?(vsize = "VSIZE") ?(ivec = []) ?(ovec = [])
 let ionly l p = if List.memq p l then "in"^(string_of_int p) else "0"
 let oonly l p = if List.memq p l then Some ("out"^(string_of_int p)) else None
 
-let stoc = to_c
-    ~imap:(fun p -> "in"^(string_of_int p))
-    ~omap:(fun p -> Some ("out"^(string_of_int p)))
+let ovl l p = List.memq p l
 
 let ctofi base (decls,stmt) =
   let fd = open_out (base^"_decl.i") in

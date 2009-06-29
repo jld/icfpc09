@@ -1,24 +1,33 @@
 #include <stdio.h>
 #include <math.h>
 
-#define VSIZE 256
+#define VSIZE 4
 
 int main(void)
 {
-	const double in16000 = 4001, in2[VSIZE] = {0}, in3[VSIZE] = {0};
-	double out0[VSIZE] = {0}, out1[VSIZE] = {0}, out2[VSIZE] = {0}, out3[VSIZE] = {0}, out4;
+	const double in16000 = 1001;
+	double in2[VSIZE], in3[VSIZE];
+	double out0[VSIZE], out1[VSIZE], out2[VSIZE], out3[VSIZE], out4;
 	#include "testing_decl.i"
-	int t;
-	
-	for (t = 0; t < 1000000; ++t) {
-		#include "testing_stmt.i"
-#if 0
-		if (oo0 != out0) printf("%d 0 %.17g\n", t, out0);
-		if (oo1 != out1) printf("%d 1 %.17g\n", t, out1);
-		if (oo2 != out2) printf("%d 2 %.17g\n", t, out2);
-		if (oo3 != out3) printf("%d 3 %.17g\n", t, out3);
-		if (oo4 != out4) printf("%d 4 %.17g\n", t, out4);
-#endif
+	int t, i;
+
+	for (i = 0; i < VSIZE; ++i) {
+		in2[i] = i / 2;
+		in3[i] = i % 2;
 	}
+	#include "testing_stmt.i"
+	for (i = 0; i < VSIZE; ++i) 
+		in3[i] = in2[i] = 0;
+
+	for (t = 0; t < 1000; ++t) {
+		#include "testing_stmt.i"
+	}
+
+	for (i = 0; i < VSIZE; ++i) {
+		printf("=== %d %d ===\n", i/2, i%2);
+		printf("X 2 %.18g\n", out2[i]);
+		printf("X 3 %.18g\n", out3[i]);
+	}
+
 	return 0;
 }
