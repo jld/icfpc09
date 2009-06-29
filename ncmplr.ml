@@ -87,11 +87,13 @@ let to_c ?(vsize = "VSIZE") ?(ivec = []) ?(ovec = fun _ -> false)
   let ilim = Array.length insns
   and bst = Buffer.create 1024
   and sta = states insns
-  and forloop b s = Printf.bprintf b "for(_i = 0; _i < %s; ++_i) {\n\t%s;\n}\n"
-      vsize s in
+  and forloop b s = Printf.bprintf b 
+      "for(int _i = 0; _i < %s; ++_i) {\n\t%s;\n}\n" vsize s in
 
+(*
   if ivec != [] then
     Buffer.add_string bst "int _i;\n";
+*)
   for i = 0 to pred ilim do
     if sta.(i) then begin
       if dvec.(i) then
@@ -108,7 +110,7 @@ let to_c ?(vsize = "VSIZE") ?(ivec = []) ?(ovec = fun _ -> false)
 
   let bac = Buffer.create 2048 in
   Buffer.add_string bac "{\n";
-  let lastcmp = ref (fun () -> "0" (* XXX *)) in
+  let lastcmp = ref (fun _ -> "0" (* XXX *)) in
   for i = 0 to pred ilim do
     let vecp = ref false in
     let deco b v =
@@ -127,7 +129,7 @@ let to_c ?(vsize = "VSIZE") ?(ivec = []) ?(ovec = fun _ -> false)
     let init = begin match insns.(i) with
       Noop -> vref i
     | Cmpz (op,r) ->
-	lastcmp := (fun () -> Printf.sprintf "%s %s 0" (vref r)
+	lastcmp := (fun vref -> Printf.sprintf "%s %s 0" (vref r)
 	    (match op with
 	      LT -> "<" | LE -> "<=" | EQ -> "==" | GE -> ">=" | GT -> ">"));
 	vref i
@@ -145,7 +147,7 @@ let to_c ?(vsize = "VSIZE") ?(ivec = []) ?(ovec = fun _ -> false)
 	| None -> vref i
 	end
     | Phi (r1,r2) -> 
-	Printf.sprintf "%s ? %s : %s" (!lastcmp ()) (vref r1) (vref r2)
+	Printf.sprintf "%s ? %s : %s" (!lastcmp vref) (vref r1) (vref r2)
     end in
     if !vecp then
       if dvec.(i) then begin

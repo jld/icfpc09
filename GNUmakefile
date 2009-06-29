@@ -8,7 +8,7 @@ CINC=
 CDBG=
 CFLAGS=$(COPT) $(CWARN) $(CDBG) $(CDEFS) $(CINC) $(XCF)
 
-PRODUCTS=sim disas icomp ideco orbit.cma
+PRODUCTS=sim disas icomp ideco orbit.cma ncmplr.cma gridtrace.cma
 OO=orbit.o orbio.o
 
 all: $(PRODUCTS)
@@ -30,6 +30,12 @@ sim: sim.o orbrun.o $(OO)
 
 orbit.cma: orbit_caml.o orbit.cmo orbutil.cmo $(OO)
 	ocamlmklib -o orbit $+
+
+ncmplr.cma: disas.cmo ncmplr.cmo
+	ocamlmklib -o ncmplr $+
+
+gridtrace.cma: gridtrace.o gridtrace.cmo
+	ocamlmklib -o gridtrace $+
 
 %.cmi: %.mli
 	$(OCAMLC) -c $<
