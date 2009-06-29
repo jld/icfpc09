@@ -102,14 +102,14 @@ value caml_scattertrace(value preload, value tmx, value pts)
 
 				double ra = 0;
 				FORLOOP(s, NSAT) {
+					if (gotsat[j] & (1 << s))
+						continue;
 					double rxs = relx_sat[s][j-i];
 					double rys = rely_sat[s][j-i];
 
 					if (sathit[s][j-i] > 0.5) {
-						if (!(gotsat[j] & (1<<s))) {
-							gotsat[j] |= (1<<s);
-							lsat[j] = t;
-						}
+						gotsat[j] |= (1 << s);
+						lsat[j] = t;
 						ra += SC_HIT;
 					}
 					ra += SC_STR / (SC_BIAS +
