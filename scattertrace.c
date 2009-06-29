@@ -13,7 +13,7 @@
 #define SC_STR 2e6
 #define SC_BIAS 1e6
 
-#define SCENE 4002
+#define SCENE 4001
 
 value caml_st_vsize(value vu);
 value caml_st_vsize(value vu)
