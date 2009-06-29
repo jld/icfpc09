@@ -74,6 +74,7 @@ let printout scen atr =
 (* 4003: ~xtra:(12,1.1,0) 12 100000 96 1000. 5. *)
 (* 4002: ~xtra:(12,1.1,10000) 12 50000 96 1000. 5. *)
 (* 4002: that with ~brake:1e-6 *)
+(* 4001: ??? *)
 let moreauto ?(xtra=(0,1.0,0)) ?(brake=1e-7) nhop time nthr dvlim step =
   let finish rpl =
     let (lcen,ld)::rpl' = rpl in
