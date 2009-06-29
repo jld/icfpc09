@@ -7,7 +7,7 @@ external vsize : unit -> int
 let pi = 3.14159265358979312
 
 let rpo (cx,cy) mr = 
-  let r = Random.float mr
+  let r = (Random.float (mr ** 0.5)) ** 2.0
   and th = Random.float (2. *. pi) in
   ((cx +. r *. cos th), (cy +. r *. sin th))
 
@@ -30,7 +30,7 @@ exception Bees
 (* 60000 96 3000. 10. or 1500. 5. *)
 let semiauto ?(valid=true) ?(pl=[]) time nthr dvlim step =
   let rec loop cen dvlim util =
-    if util < 1e-3 && util > dvlim then
+    if util < 1e-3 && dvlim < 1e-3 then
       raise Bees;
     Printf.printf "scbe %d %d (%g,%g) %g \\ %g\n%!" 
       time nthr (fst cen) (snd cen) dvlim util;
@@ -63,7 +63,7 @@ let printout scen atr =
   Printf.bprintf b "f 2000000 0\n";
   Buffer.contents b
 
-(* 11 50000 96 1500. 5. *)
+(* 12 50000 96 1500. 5. *)
 let moreauto nhop time nthr dvlim step =
   let finish rpl =
     let (lcen,ld)::rpl' = rpl in
